@@ -31,6 +31,10 @@
 12122222 
 22222222 
 12673939 
+
+1
+12341234 
+
 예제 출력
 4
 2
@@ -38,15 +42,24 @@
 2
 14
 '''
-
 import sys
+INF = float('inf')
+
 C = int(sys.stdin.readline())
 numbers = []
 for i in range(C):
-    temp = list(map(int, list(sys.stdin.readline())))
-    numbers.append(temp)
+    temp = sys.stdin.readline()
+    temp = temp[:-2]
 
-# 모든 숫자가 같은지 판단하는 함수
+    temp = list(map(int, list(temp)))
+    numbers.append(temp)
+ 
+for i in range(C):
+    print(numbers[i])
+
+
+
+# 모든 숫자가 같은지 판단하는 함수 1점
 def delta_is_zero(num_list): # 수열이 리스트로 입력된다.
     n = num_list[0]
     if num_list.count(n) == len(num_list):
@@ -54,29 +67,28 @@ def delta_is_zero(num_list): # 수열이 리스트로 입력된다.
     else:
         return False
 
-# 모든 숫자가 1씩 증가하거나 감소하는(변화하는) 사실을 판단하는 함수.
+# 모든 숫자가 1씩 증가하거나 감소하는(변화하는) 사실을 판단하는 함수. 2점
 def delta_is_one(num_list):
     ret = True
-    # num_list는 최소 3의 길이를 가진다.
-    i = 1
-    if num_list[0] + 1 == num_list[1]: # increasing case
-        while i < len(num_list):
-            if ( num_list[i] + 1 == num_list[i+1] ):
-                continue
-            else:
-                ret = False
-            i += 1
-    elif num_list[0] - 1 == num_list[1]: # decreasing case
-        while i < len(num_list):
-            if ( num_list[i] + 1 == num_list[i+1] ):
-                continue
-            else:
-                ret = False
-            i += 1
+    # num_list는 최소 3의 길이를 가진다.    
+    length = len(num_list)
+    if length == 3:
+        if ( num_list[0] - num_list[1] ) == ( num_list[1] - num_list[2] ):
+            return True
+        else:
+            return False
+    if length == 4:
+        if ( num_list[0] - num_list[1] ) == ( num_list[1] - num_list[2] ) == ( num_list[2] - num_list[3] ):
+            return True
+        else:
+            return False
+    if length == 5:
+        if ( num_list[0] - num_list[1] ) == ( num_list[1] - num_list[2] ) == ( num_list[2] - num_list[3] ) == ( num_list[3] - num_list[4] ):
+            return True
+        else:
+            return False
 
-    return ret
-    
-# 2개의 숫자가 번갈아가며 나타날 때
+# 2개의 숫자가 번갈아가며 나타날 때 4점
 def is_zigzag(num_list):
     l = len(num_list)
     a = num_list[0]
@@ -92,9 +104,8 @@ def is_zigzag(num_list):
             return True
     return False
 
-# 숫자가 등차 수열을 이룰 때
+# 숫자가 등차 수열을 이룰 때 5점
 def delta_is_n(num_list):
- 
     d = num_list[1] - num_list[0] # 공차가 d
     l = len(num_list)
     if l == 3:
@@ -115,8 +126,51 @@ def delta_is_n(num_list):
 
 # 최적 부분 구조를 만들려면 어떻게 하는게 좋을까?
 # 남은 문자열을 입력!! 남은 문자열의 시작 인덱스를 입력하면 그에 해당하는 결과가 유일하고 외부요인에 독립적!
-# 자연수는 8자리 이상 10,000자리 이하의 자연수이므로 cache의 인덱스는 크기는 
+# 자연수는 8자리 이상 10,000자리 이하의 자연수이므로 cache의 인덱스는 크기는 10000?
+
+def score(num_list):
+    if delta_is_zero(num_list):
+        return 1
+    elif delta_is_one(num_list):
+        return 2
+    elif is_zigzag(num_list):
+        return 4
+    elif delta_is_n(num_list):
+        return 5
+    else:
+        return 10   
 
 
+for i in range(C):
+    number = numbers[i]
+    cache = [-1]*100
+    def calculator(index):
+        if cache[index] != -1:
+            return cache[index]
 
+        remain_length = len(number) - index
 
+        ret = 0
+
+        if remain_length <= 2:
+            return INF # 양의 무한대를 반환하면, min에서 이게 자동으로 사라지는 케이스가 될 듯.
+        elif remain_length == 3:
+            sub_num_3 = number[index:index+3]
+            ret = score(sub_num_3)
+        elif remain_length == 4:
+            sub_num_3 = number[index:index+3]
+            sub_num_4 = number[index:index+4]
+            ret = min(score(sub_num_3), score(sub_num_4))
+        elif remain_length == 5:
+            sub_num_3 = number[index:index+3]
+            sub_num_4 = number[index:index+4]
+            sub_num_5 = number[index:index+5]
+            ret = min(score(sub_num_3), score(sub_num_4), score(sub_num_5))
+        else: # 남은 길이가 6 이상일때 -> 지금까지의 것들을 더한다.
+            sub_num_3 = number[index:index+3]
+            sub_num_4 = number[index:index+4]
+            sub_num_5 = number[index:index+5]
+            ret = min(score(sub_num_3) + calculator(index+3), score(sub_num_4) + calculator(index+4), score(sub_num_5) + calculator(index+5))
+        cache[index] = ret
+        return ret
+    print(i+1,'번째 입력에 대한 난이도의 합의 최소: ', calculator(0))

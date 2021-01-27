@@ -26,6 +26,12 @@ Quantization (양자화) 과정은, 더 넓은 범위를 갖는 값들을 작은
 예제 출력
 0
 651
+
+
+
+1
+10 3
+3 3 3 1 2 3 2 2 2 1
 '''
 INF = float('inf')
 
@@ -45,26 +51,12 @@ for i in range(C):
     temp = list(map(int, temp))
     num_list.append(temp)
 
-# print('num_list 확인')
-
-# for i in range(C):
-#     print('num_list[i]: ', num_list[i])
-
 
 print('\n\n--------------연산 시작--------------\n\n')
 # n_list가 필요할까?
 
 # 주어진 문제를 작은 문제로 나누어 해결하자.
 # 작은 문제는 남은 부분 수열과 지금까지 사용한 s의 리스트가 주어졌을 때, 남은 부분 수열에서 최소 오차 제곱의 합을 찾는 것!
-
-# # 최소 오차 제곱의 합을 계산하는 함수를 만들어보자
-# def sum_error_square(sub_list, quantom): # 입력되는 sub_list를 quantom으로 근사시켰을 때의 오차의 제곱의 합을 반환.
-#     sum = 0
-#     for num in sub_list:
-#         sum += (num - quantom) ** 2
-#     return sum
-# # 필요없어졌음
-
 
 # 어떤 수로 양자화할 지 결정하는 함수를 만들어보자.
 # 양자화한 수가 필요한 것이 아니라, 양자화된 후의 error의 개수가 결국 필요하다. error는 위의 sum_error_square로 구하자.
@@ -76,16 +68,16 @@ def minError(sublist):
     end = max(sublist)
     i = 0
     sum_list = []
-    #print('\n\nstart: ',start, '/ end: ', end)
+    
     for quantom in range(start, end+1): 
         sum = 0
         for num in sublist:
             sum += (num - quantom) ** 2
-        #print('sum: ', sum)
         sum_list.append(sum)
         i += 1
-    #print('sum_list: ', sum_list)
+   
     return min(sum_list)
+
 
 for i in range(C):
     input_list = num_list[i] # input_list는 양자화 시스템의 인풋이다.
@@ -93,43 +85,42 @@ for i in range(C):
 
     # input should be sorted
     input_list.sort() # 오름차순.
-    #print('정렬된 input_list: ', input_list)
-
+        
     # memoization에 사용되는 cache의 크기는? (정렬된 input_list의 인덱스의 개수) x (최초 s의 개수) 이다. 
-    cache = [ [-1]*(s+1) ]*(n_list[i])
-    # cache[i][j] = "i번째 인덱스부터 시작하는 부분 수열, j개로 나눌 수 있는 경우" 의 최소 오차 제곱의 합.
-    # print('cache의 len: ',len(cache))
-    # print('cache[0]의 len: ',len(cache[0])
-    # print('cache[0][3] : ', cache[0][3])
+    cache = [ [-1]*(s+1) ]*(len(input_list) + 1) # cache[i][j] = "i번째 인덱스부터 시작하는 부분 수열, j개로 나눌 수 있는 경우" 의 최소 오차 제곱의 합.
 
 
     # 함수는 남은 수열의 시작 인덱스와 남은 s의 개수(사용할 수 있는 quantom의 개수 = 남은 수열을 분할하는 개수)를 받아서 최소 오차 제곱의 합을 반환한다.
     def quantize(index, remain_s):
-        # print('cache의 len: ',len(cache))
-        # print('cache[0]의 len: ',len(cache[0]))
-        # print('index:',index,'/ remain_s:',remain_s)
-        
+        # print(cache)
         # 1. 메모이제이션
-        # if cache[index][remain_s] != -1: # remain_s 가 0인 케이스는 계산이 필요없기 때문에 s = 1을 0의 자리에 넣는다.
-        #    return cache[index][remain_s-1]
+        if cache[index][remain_s] != -1: # remain_s 가 0인 케이스는 계산이 필요없기 때문에 s = 1을 0의 자리에 넣는다.
+            print('-----------memoization 실행-----------')
+            print('index: ',index,'/ remain_s: ', remain_s, '/ cache[index][remain_s]: ', cache[index][remain_s])    
+    
+            return cache[index][remain_s]
 
         # 2. 기저케이스
         if remain_s == 1:
             ret = minError(input_list[index:])
-            #cache[index][remain_s] = ret
-            #print('index: ',index,'/ remain_s: ',remain_s, '/ ret: ',ret)
+            cache[index][remain_s] = ret
+            print('ret가 어떤 형식이길래? ret: ',ret )
+            print('여기에서 remain_s가 1일때, ')
+            print('index: ',index,'/ remain_s: ', remain_s, '/ cache[index][remain_s]: ', cache[index][remain_s])
+            print('cache가 ', cache)
             return ret
 
         # 3. recursive part 
         ret = INF
         remain_length = n_list[i] - index
-        #print('remain_length: ', remain_length)
 
         # 남은 수열에서 선택하는 서브 수열은 모든 길이 전부 다. (하나의 수부터 시작해서 전체 수열까지.) 
         for n in range(1, remain_length):
             ret = min( ret, minError(input_list[index:index+n]) + quantize(index + n, remain_s - 1) )
         cache[index][remain_s] = ret
-        # print('index: ',index,'/ remain_s: ',remain_s, '/ ret: ',ret)
+        print('index: ',index,'/ remain_s: ', remain_s, '/ cache[index][remain_s]: ', cache[index][remain_s])
+
         return ret
 
     print(i+1,'번째 입력의 양자화 결과: ',quantize(0, s))
+

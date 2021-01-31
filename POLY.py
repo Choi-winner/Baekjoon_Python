@@ -84,4 +84,4 @@ for i in range(C):
         cache[n][first] = ret
         return ret 
 
-    print i+1, '번째 입력에 대한 출력은 ', poly(n_input, 0)  # first를 0으로 둬도 괜찮을까?
+    print(i+1, '번째 입력에 대한 출력은 ', poly(n_input, 0) ) # first를 0으로 둬도 괜찮을까?

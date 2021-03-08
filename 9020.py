@@ -53,13 +53,14 @@ for i in range(T):
     ans = []
     for j in range(len(prime_list)):
         if len(ans) == 0: # 만약 ans에 아무것도 없다면, 
-            if bs(prime_list, even_n - prime_list[j]): # 두 소수의 합이 짝수인 두 소수를 찾았을 때,
-                ans = [prime_list[j], even_n - prime_list[j]] # 바로 두 소수를 ans에 업로드
+            if even_n > prime_list[j]:
+                if bs(prime_list, even_n - prime_list[j]): # 두 소수의 합이 짝수인 두 소수를 찾았을 때,
+                    ans = [prime_list[j], even_n - prime_list[j]] # 바로 두 소수를 ans에 업로드
         else: # 만약 ans에 어떤 값이 이미 존재한다면,
-            if bs(prime_list, even_n - prime_list[j]):
-                # print('')
-                if abs(ans[0] - ans[1]) > abs(prime_list[j] - (even_n - prime_list[j])): # 두 소수의 차가 더 작은 것을 업로드
-                    ans = [prime_list[j], even_n - prime_list[j]] # 이 두 수는 자동으로 오름차순인가?
+            if even_n > prime_list[j]:
+                if bs(prime_list, even_n - prime_list[j]):
+                    if abs(ans[0] - ans[1]) > abs(prime_list[j] - (even_n - prime_list[j])): # 두 소수의 차가 더 작은 것을 업로드
+                        ans = [prime_list[j], even_n - prime_list[j]] # 이 두 수는 자동으로 오름차순인가?
     print(ans[0], ans[1])
 
      
